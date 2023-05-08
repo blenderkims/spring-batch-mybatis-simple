@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.minseok.batch.repository.UserRepository">
+
+    <sql id="commonPagingTail">
+        limit #{_skiprows}, #{_pagesize}
+    </sql>
+
+    <select id="selectUserTotalCount" resultType="java.lang.Integer">
+        select count(*)
+        from tb_user
+    </select>
+
+    <select id="selectUserPagingList" resultType="com.minseok.batch.dto.User">
+        select *
+        from tb_user u
+        where 1=1
+    <if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(startId)">
+        and u.id <![CDATA[>=]]> #{startId}
+    </if>
+    <if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(endId)">
+        and u.id <![CDATA[<]]> #{endId}
+    </if>
+        order by u.id asc
+        <include refid="commonPagingTail" />
+    </select>
+
+    <select id="selectUserMinId" resultType="java.lang.String">
+        select min(t.id) from (
+            select u.id
+            from tb_user u
+            where 1=1
+        <if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(startId)">
+            and u.id <![CDATA[>=]]> #{startId}
+        </if>
+        <if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(endId)">
+            and u.id <![CDATA[<]]> #{endId}
+        </if>
+            order by u.id asc
+            <include refid="commonPagingTail" />
+        ) t
+    </select>
+
+    <select id="selectUserMaxId" resultType="java.lang.String">
+        select max(t.id) from (
+            select u.id
+            from tb_user u
+            where 1=1
+        <if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(startId)">
+            and u.id <![CDATA[>=]]> #{startId}
+        </if>
+        <if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(endId)">
+            and u.id <![CDATA[<]]> #{endId}
+        </if>
+            order by u.id asc
+            <include refid="commonPagingTail" />
+        ) t
+    </select>
+
+    <update id="mergeUserBak">
+        insert into tb_user_bak (
+            id, email, password, name, nickname, mobile, created_at, modified_at
+        ) values (
+            #{id}, #{email}, #{password}, #{name}, #{nickname}, #{mobile}, #{createdAt}, #{modifiedAt}
+        ) on duplicate key update
+            email = #{email}, password = #{password}, name = #{name}, nickname = #{nickname}
+            , mobile = #{mobile}, created_at = #{createdAt}, modified_at = #{modifiedAt}
+    </update>
+
+    <delete id="deleteUserBakRemainData">
+        delete ub from tb_user_bak ub where not exists(select * from tb_user u where u.id = ub.id)
+    </delete>
+
+</mapper>

@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: spring-batch-sample
+
+  datasource:
+    driver-class-name: "your database driver class"
+    url: "your database connection string"
+    username: "your database username"
+    password: "your database password"
+    hikari:
+      maximum-pool-size: 30
+      connection-timeout: 5000
+      connection-init-sql: select 1
+      validation-timeout: 2000
+      minimum-idle: 10
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  batch:
+    jdbc:
+      initialize-schema: always
+
+mybatis:
+  configuration:
+    jdbc-type-for-null: "NULL"
+    call-setters-on-nulls: true
+    map-underscore-to-camel-case: true
+  mapper-locations: mybatis/*.xml
+  executor-type: batch
+
+logging:
+  level:
+    root: info
